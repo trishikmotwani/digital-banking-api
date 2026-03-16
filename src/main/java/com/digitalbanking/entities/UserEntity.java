@@ -7,24 +7,25 @@ import lombok.*;
 
 @Entity
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED) // This is the key change
 @Data
-@EqualsAndHashCode(callSuper = true) // Important: Includes base fields in equals/hashcode
+@EqualsAndHashCode(callSuper=false)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class UserEntity extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String userId;
     
-    @Column(nullable = false, unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
     
-    @Column(nullable = false)
     private String password;
     
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.ROLE_USER;
+    
     private LocalDateTime lastLoggedIn;
-    private boolean isActive = true;
 }
+

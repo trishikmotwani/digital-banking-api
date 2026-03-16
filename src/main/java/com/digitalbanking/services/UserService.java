@@ -61,7 +61,7 @@ public class UserService implements IUserService {
 
         // Proceed with hashing and saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setActive(true);
+        
         userRepository.save(user);
         
         UserDto userDto = new UserDto();
