@@ -12,6 +12,7 @@ import com.digitalbanking.entities.TransactionEntity;
 import com.digitalbanking.repositories.AccountRepository;
 import com.digitalbanking.repositories.CustomerRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -61,5 +62,35 @@ public class AccountService {
         allTransactions.addAll(account.getSentTransactions());
         allTransactions.addAll(account.getReceivedTransactions());
         return allTransactions;
+    }
+    
+    public List<AccountEntity> getAccountsByUsername(String username) {
+        // 1. Find the customer associated with this username 
+        // (Assuming CustomerRepository can find by user username)
+        CustomerEntity customer = customerRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Customer not found for user: " + username));
+        
+        // 2. Return the list of accounts linked to this customer
+        return customer.getAccounts();
+    }
+    
+    @Transactional
+    public AccountEntity createAccountByUsername(String username, AccountEntity account) {
+        CustomerEntity customer = customerRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        // Check if this customer already has this type of account
+        boolean alreadyExists = customer.getAccounts().stream()
+                .anyMatch(acc -> acc.getAccountType() == account.getAccountType());
+
+        if (alreadyExists) {
+            throw new RuntimeException("Customer already has a " + account.getAccountType() + " account.");
+        }
+
+        account.setCustomer(customer);
+        account.setAccountNumber("ACC" + System.currentTimeMillis());
+        account.setStatus(AccountStatus.ACTIVE);
+
+        return accountRepository.save(account);
     }
 }

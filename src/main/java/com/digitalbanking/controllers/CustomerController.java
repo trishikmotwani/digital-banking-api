@@ -32,12 +32,12 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerEntity> updateCustomer(@PathVariable String id, @RequestBody CustomerEntity customer) {
+    public ResponseEntity<CustomerEntity> updateCustomer(@PathVariable("id") String id, @RequestBody CustomerEntity customer) {
         return ResponseEntity.ok(customerService.updateCustomer(id, customer));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCustomer(@PathVariable String id) {
+    public ResponseEntity<String> deleteCustomer(@PathVariable("id") String id) {
         customerService.deleteCustomer(id);
         return ResponseEntity.ok("Customer archived successfully.");
     }
@@ -48,7 +48,7 @@ public class CustomerController {
     }
 
     @PatchMapping("/verify-kyc/{mobileNumber}")
-    public ResponseEntity<CustomerEntity> verifyKyc(@PathVariable String mobileNumber) {
+    public ResponseEntity<CustomerEntity> verifyKyc(@PathVariable("mobileNumber") String mobileNumber) {
         return ResponseEntity.ok(customerService.verifyKyc(mobileNumber));
     }
 }

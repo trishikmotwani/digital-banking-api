@@ -38,13 +38,13 @@ public class SecurityConfig {
 //    	return new InMemoryUserDetailsManager(admin);
 //    }
 	
-	@Bean
-	public InMemoryUserDetailsManager userDetailsManager() {
-		UserDetails ud = User.builder().username("admin")
-				.password(passwordEncoder().encode("admin123"))
-				.build();
-		return new InMemoryUserDetailsManager(ud);
-	}
+//	@Bean
+//	public InMemoryUserDetailsManager userDetailsManager() {
+//		UserDetails ud = User.builder().username("admin")
+//				.password(passwordEncoder().encode("admin123"))
+//				.build();
+//		return new InMemoryUserDetailsManager(ud);
+//	}
 	
 	@Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -95,7 +95,7 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 	    CorsConfiguration configuration = new CorsConfiguration();
 	    // Allow your React app's origin
-	    configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); 
+	    configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174", "http://localhost:3000")); 
 	    // Allow all standard HTTP methods
 	    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 	    // Allow necessary headers

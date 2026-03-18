@@ -2,6 +2,9 @@ package com.digitalbanking.entities;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,16 +40,22 @@ public class AccountEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private AccountStatus status = AccountStatus.ACTIVE;
-
+    
+    @Enumerated(EnumType.STRING)
+    private AccountType accountType; // SAVINGS or CURRENT
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
+    @JsonBackReference
     private CustomerEntity customer;
     
     @OneToMany(mappedBy = "senderAccount", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<TransactionEntity> sentTransactions;
 
     // All money received TO this account
     @OneToMany(mappedBy = "receiverAccount", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<TransactionEntity> receivedTransactions;
 }
 

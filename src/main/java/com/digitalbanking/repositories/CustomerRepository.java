@@ -9,6 +9,11 @@ import com.digitalbanking.entities.CustomerEntity;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<CustomerEntity, String> {
+    
+    // Spring will automatically join with the UserEntity table to find by username
+    Optional<CustomerEntity> findByUsername(String username);
+
     Optional<CustomerEntity> findByMobileNumber(String mobileNumber);
 }
+
 

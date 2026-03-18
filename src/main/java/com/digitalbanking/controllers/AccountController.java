@@ -29,13 +29,26 @@ public class AccountController {
 
     // Manager: Create Account for a specific customer
     @PostMapping("/manager/create/{customerId}")
-    public ResponseEntity<AccountEntity> createAccount(@PathVariable String customerId, @RequestBody AccountEntity account) {
+    public ResponseEntity<AccountEntity> createAccount(@PathVariable("customerId") String customerId, @RequestBody AccountEntity account) {
         return new ResponseEntity<>(accountService.createAccount(customerId, account), HttpStatus.CREATED);
+    }
+    
+ // Updated: Create Account using username
+    @PostMapping("/manager/create-by-username/{username}")
+    public ResponseEntity<AccountEntity> createAccountByUsername(
+            @PathVariable("username") String username, 
+            @RequestBody AccountEntity account) {
+        
+        // Ensure your service logic is updated to find the customer by username
+        return new ResponseEntity<>(
+            accountService.createAccountByUsername(username, account), 
+            HttpStatus.CREATED
+        );
     }
 
     // Manager: Change status (Block/Unblock)
     @PatchMapping("/manager/status/{id}")
-    public ResponseEntity<AccountEntity> setStatus(@PathVariable Long id, @RequestParam AccountStatus status) {
+    public ResponseEntity<AccountEntity> setStatus(@PathVariable("id") Long id, @RequestParam AccountStatus status) {
         return ResponseEntity.ok(accountService.updateStatus(id, status));
     }
 
@@ -47,13 +60,22 @@ public class AccountController {
 
     // Customer: View Balance
     @GetMapping("/customer/balance/{accountNumber}")
-    public ResponseEntity<Double> viewBalance(@PathVariable String accountNumber) {
+    public ResponseEntity<Double> viewBalance(@PathVariable("accountNumber") String accountNumber) {
         return ResponseEntity.ok(accountService.getBalance(accountNumber));
     }
 
     // Customer: View Statement (Data for the list)
     @GetMapping("/customer/statement/{accountNumber}")
-    public ResponseEntity<List<TransactionEntity>> viewStatement(@PathVariable String accountNumber) {
+    public ResponseEntity<List<TransactionEntity>> viewStatement(@PathVariable("accountNumber") String accountNumber) {
         return ResponseEntity.ok(accountService.getStatement(accountNumber));
     }
+    
+    // Customer: Get all accounts by username
+    @GetMapping("/customer/{username}")
+    public ResponseEntity<List<AccountEntity>> getAccountsByUsername(@PathVariable("username") String username) {
+        // This will call the service layer to find accounts associated with the customer's username
+        List<AccountEntity> accounts = accountService.getAccountsByUsername(username);
+        return ResponseEntity.ok(accounts);
+    }
+
 }

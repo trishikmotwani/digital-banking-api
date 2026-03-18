@@ -12,12 +12,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.digitalbanking.dtos.UserDto;
+import com.digitalbanking.entities.CustomerEntity;
 import com.digitalbanking.entities.UserEntity;
+import com.digitalbanking.entities.UserRole;
 import com.digitalbanking.exceptions.UserAlreadyExistsException;
 import com.digitalbanking.exceptions.UserNotFoundException;
 import com.digitalbanking.repositories.UserRepository;
 import com.digitalbanking.security.jwt.JWTService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -53,19 +56,41 @@ public class UserService implements IUserService {
     }
     
     @Override
+    @Transactional
     public UserDto registerUser(UserEntity user) {
-        // Check if username already exists in MySQL
+        // 1. Check if username exists
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new UserAlreadyExistsException("Username '" + user.getUsername() + "' is already taken.");
         }
 
-        // Proceed with hashing and saving
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        
-        userRepository.save(user);
-        
+        // 2. Encode the password
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+
+        UserEntity savedUser;
+
+        // 3. Handle Role-Based Entity Creation
+        if (user.getRole() == UserRole.ROLE_USER) {
+            // Create a CustomerEntity to ensure records are created in BOTH tables
+            CustomerEntity customer = new CustomerEntity();
+            BeanUtils.copyProperties(user, customer); // Copies username, etc.
+            customer.setPassword(encodedPassword);
+            
+            // Set mandatory customer-specific defaults
+            customer.setKycVerified(false);
+            customer.setDeleted(false);
+            customer.setIncome(0.0);
+            customer.setAge(18); // Default or extract from request if available
+
+            savedUser = userRepository.save(customer);
+        } else {
+            // Standard UserEntity for ADMIN/MANAGER
+            user.setPassword(encodedPassword);
+            savedUser = userRepository.save(user);
+        }
+
+        // 4. Map to DTO
         UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(user, userDto);
+        BeanUtils.copyProperties(savedUser, userDto);
         return userDto;
     }
 
@@ -96,5 +121,29 @@ public class UserService implements IUserService {
             return userDto;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public UserDto getUserByUsername(String username) {
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        // Map Entity to DTO (Assuming you have a mapper or a constructor)
+        UserDto dto = new UserDto();
+        dto.setUsername(user.getUsername());
+        dto.setRole(user.getRole());
+        // Add other fields like lastLoggedIn if needed
+        return dto;
+    }
+    
+    @Override
+    @Transactional
+    public void updateUserRole(String userId, UserRole newRole) {
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        user.setRole(newRole);
+        userRepository.save(user);
+    }
+
 }
 
