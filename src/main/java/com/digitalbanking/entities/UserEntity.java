@@ -27,5 +27,6 @@ public class UserEntity extends BaseEntity {
     private UserRole role = UserRole.ROLE_USER;
     
     private LocalDateTime lastLoggedIn;
+   
 }
 

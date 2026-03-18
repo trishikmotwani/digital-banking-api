@@ -1,20 +1,12 @@
 package com.digitalbanking.controllers;
 
 import java.util.List;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.digitalbanking.dtos.TransactionDto;
 import com.digitalbanking.dtos.TransactionRequest;
 import com.digitalbanking.dtos.TransferRequest;
-import com.digitalbanking.entities.TransactionEntity;
 import com.digitalbanking.services.TransactionService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,42 +16,38 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransactionController {
 
-	private final TransactionService transactionService;
+    private final TransactionService transactionService;
 
     @PostMapping("/deposit")
-    public ResponseEntity<TransactionEntity> deposit(@RequestBody TransactionRequest request) {
-        return ResponseEntity.ok(transactionService.depositMoney(
-            request.getAccountNumber(), 
-            request.getAmount()));
+    public ResponseEntity<TransactionDto> deposit(@RequestBody TransactionRequest request) {
+        return ResponseEntity.ok(transactionService.depositMoney(request.getAccountNumber(), request.getAmount()));
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<TransactionEntity> withdraw(@RequestBody TransactionRequest request) {
-        return ResponseEntity.ok(transactionService.withdrawMoney(
-            request.getAccountNumber(), 
-            request.getAmount()));
+    public ResponseEntity<TransactionDto> withdraw(@RequestBody TransactionRequest request) {
+        return ResponseEntity.ok(transactionService.withdrawMoney(request.getAccountNumber(), request.getAmount()));
     }
 
-    @PostMapping("/transfer")
-    public ResponseEntity<TransactionEntity> transfer(@RequestBody TransferRequest request) {
-        return ResponseEntity.ok(transactionService.transferMoney(
-            request.getFromAccountNumber(), 
-            request.getToAccountNumber(), 
-            request.getAmount()));
+    // Step 1: Initiate and get WhatsApp link
+    @PostMapping("/transfer/initiate")
+    public ResponseEntity<String> initiateTransfer(@RequestBody TransferRequest request) {
+        String waLink = transactionService.initiateTransfer(request.getFromAccountNumber());
+        return ResponseEntity.ok(waLink);
     }
 
- // CUSTOMER: View only their specific history
+    // Step 2: Confirm with OTP
+    @PostMapping("/transfer/confirm")
+    public ResponseEntity<TransactionDto> confirmTransfer(@RequestBody TransferRequest request) {
+        return ResponseEntity.ok(transactionService.confirmAndTransfer(request));
+    }
+
     @GetMapping("/history/{accountNumber}")
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN')")
-    public ResponseEntity<List<TransactionEntity>> getHistory(@PathVariable("accountNumber") String accountNumber) {
+    public ResponseEntity<List<TransactionDto>> getHistory(@PathVariable String accountNumber) {
         return ResponseEntity.ok(transactionService.getTransactionHistory(accountNumber));
     }
 
-    // ADMIN: View every transaction in the system
     @GetMapping("/admin/all")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_MANAGER')")
-    public ResponseEntity<List<TransactionEntity>> viewAll() {
+    public ResponseEntity<List<TransactionDto>> viewAll() {
         return ResponseEntity.ok(transactionService.getAllTransactions());
     }
 }
-

@@ -45,6 +45,8 @@ dependencies {
     
     // JJWT Jackson (or Gson) for JSON parsing (Runtime only)
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    
+    implementation 'org.modelmapper:modelmapper:3.2.1'
 }
 
 tasks.named('test') {
