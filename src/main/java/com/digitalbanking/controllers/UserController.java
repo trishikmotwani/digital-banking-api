@@ -54,7 +54,7 @@ public class UserController {
     
     @PatchMapping("/{userId}/role")
 	 // You should protect this with @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')")
-	 public ResponseEntity<String> updateRole(@PathVariable String userId, @RequestBody UserRole role) {
+	 public ResponseEntity<String> updateRole(@PathVariable("userId") String userId, @RequestBody UserRole role) {
 	     userService.updateUserRole(userId, role);
 	     return ResponseEntity.ok("User role updated to " + role);
 	 }

@@ -42,7 +42,7 @@ public class TransactionController {
     }
 
     @GetMapping("/history/{accountNumber}")
-    public ResponseEntity<List<TransactionDto>> getHistory(@PathVariable String accountNumber) {
+    public ResponseEntity<List<TransactionDto>> getHistory(@PathVariable("accountNumber") String accountNumber) {
         return ResponseEntity.ok(transactionService.getTransactionHistory(accountNumber));
     }
 
