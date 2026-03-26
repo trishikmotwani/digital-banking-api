@@ -12,6 +12,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,6 +39,11 @@ public class CustomerEntity extends UserEntity {
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<AccountEntity> accounts;
+    
+// @OneToOne is usually used for has-a relationship, for is-a relationshil we use @Inheritence(strategy = InheritanceType.JOINED)
+// JPA + hibernate works in the same way.
+//    @OneToOne(mappedBy = "user_id", fetch = FetchType.LAZY)
+//    private UserEntity user;
     
 }
 
